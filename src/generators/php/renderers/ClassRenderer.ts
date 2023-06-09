@@ -15,22 +15,40 @@ import { ClassPresetType } from '../PhpPreset';
 export class ClassRenderer extends PhpRenderer<ConstrainedObjectModel> {
   async defaultSelf(): Promise<string> {
     const content = [
-      await this.renderProperties(),
+      //@@ await this.renderProperties(),
       await this.runCtorPreset(),
-      await this.renderAccessors(),
+      //@@ await this.renderAccessors(),
       await this.runAdditionalContentPreset()
     ];
 
-    return `final class ${this.model.name}
+    return `final class ${this.model.name} extends \\Scalefast\\Common\\Event\\AbstractEvent
 {
+
+ public const EVENT_NAME = '${this.model.name}';
+
 ${this.indent(this.renderBlock(content, 2))}
 }
 `;
   }
 
   runCtorPreset(): Promise<string> {
-    return this.runPreset('ctor');
+    //@@ return this.runPreset('ctor');
+    return this.renderCtor();
   }
+
+  async renderCtor(): Promise<string> {
+    const properties = this.model.properties || {};
+    const content: string[] = [];
+
+    content.push(`public function __construct(`);
+    for (const property of Object.values(properties)) {
+      const rendererProperty = await this.runPropertyPreset(property);
+      content.push(rendererProperty + ', ');
+    }
+    content.push(`) { parent::__construct(); }`);
+     return this.renderBlock(content);
+  }
+
 
   /**
    * Render all the properties for the class.
@@ -41,7 +59,7 @@ ${this.indent(this.renderBlock(content, 2))}
 
     for (const property of Object.values(properties)) {
       const rendererProperty = await this.runPropertyPreset(property);
-      content.push(rendererProperty);
+      content.push(rendererProperty + ';');
     }
 
     return this.renderBlock(content);
@@ -62,6 +80,7 @@ ${this.indent(this.renderBlock(content, 2))}
       const getter = await this.runGetterPreset(property);
       const setter = await this.runSetterPreset(property);
       content.push(this.renderBlock([getter, setter]));
+      content.push(this.renderBlock([getter]));
     }
 
     return this.renderBlock(content, 2);
@@ -81,12 +100,21 @@ export const PHP_DEFAULT_CLASS_PRESET: ClassPresetType<PhpOptions> = {
     return renderer.defaultSelf();
   },
   property({ property }) {
+    //@@
+    const propertyRequired = property.required || property.property.type === 'mixed' ? '' : '?';
+    /*@@
     const propertyType =
       property.required || property.property.type === 'mixed'
         ? property.property.type
         : `?${property.property.type}`;
+    */
+    //const util = require('util')
+    //console.log('PROP ' + property.propertyName + " " + util.inspect(property.property.originalInput, {showHidden: false, depth: null, colors: true}))
+    let propertyType = typeof property.property.originalInput.format !== 'undefined' ?
+            (property.property.originalInput.format === 'date-time' ? '\\DateTimeImmutable' : property.property.type) :
+            property.property.type;
 
-    return `private ${propertyType} $${property.propertyName};`;
+    return `public readonly ${propertyRequired}${propertyType} $${property.propertyName}`;
   },
   getter({ property }) {
     const getterName = FormatHelpers.toPascalCase(property.propertyName);
@@ -105,5 +133,5 @@ export const PHP_DEFAULT_CLASS_PRESET: ClassPresetType<PhpOptions> = {
         : `?${property.property.type}`;
 
     return `public function set${setterName}(${propertyType} $${property.propertyName}): void { $this->${property.propertyName} = $${property.propertyName}; }`;
-  }
+  },
 };

@@ -1,38 +1,18 @@
 import { TypeScriptGenerator } from '../../src';
+import { PhpGenerator } from '../../src';
+import { PhpFileGenerator } from '../../src';
 
-const generator = new TypeScriptGenerator();
-const AsyncAPIDocument = {
-  asyncapi: '2.0.0',
-  info: {
-    title: 'Example with OpenAPI',
-    version: '0.1.0'
-  },
-  channels: {
-    example: {
-      publish: {
-        message: {
-          schemaFormat: 'application/vnd.oai.openapi;version=3.0.0',
-          payload: {
-            type: 'object',
-            properties: {
-              title: {
-                type: 'string',
-                nullable: true
-              },
-              author: {
-                type: 'string',
-                example: 'Jack Johnson'
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-};
+//@@@ const generator = new TypeScriptGenerator();
+const generator: PhpFileGenerator = new PhpFileGenerator();
+//const generator: PhpGenerator = new PhpGenerator();
+
+//read a JSON file and set contents in variable AsyncAPIDocument
+const AsyncAPIDocument = require('../../../oas/generated/json/purchase.json');
 
 export async function generate(): Promise<void> {
-  const models = await generator.generate(AsyncAPIDocument);
+  //const models = await generator.generate(AsyncAPIDocument);
+  const models = await generator.generateToFiles(AsyncAPIDocument, './files');
+  //const models = await generator.generateCompleteModels(AsyncAPIDocument, {});
   for (const model of models) {
     console.log(model.result);
   }

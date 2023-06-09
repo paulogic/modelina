@@ -82,7 +82,6 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
       const detailed = createDetailedAsyncAPI(parsedJSON, parsedJSON);
       doc = createAsyncAPIDocument(detailed);
     }
-
     inputModel.originalInput = doc;
     // Go over all the message payloads and convert them to models
     for (const message of doc.allMessages()) {
@@ -130,6 +129,9 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
     }
 
     let schemaUid = schema.id();
+    const util = require('util')
+    console.log('id: ' + schema.id());
+    console.log('type: ' + schema.type());
     //Because the constraint functionality of generators cannot handle -, <, >, we remove them from the id if it's an anonymous schema.
     if (
       typeof schemaUid !== 'undefined' &&
@@ -140,18 +142,24 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
         .replace(/-/g, '_')
         .replace('>', '');
     }
+    //@@
+    if (typeof schemaUid !== 'undefined' && schema.type() === 'object') {
+       console.log('SCHEMA '+ schemaUid);
+    }
 
     if (alreadyIteratedSchemas.has(schemaUid)) {
       return alreadyIteratedSchemas.get(schemaUid) as AsyncapiV2Schema;
     }
-
     const convertedSchema = Object.assign(
       new AsyncapiV2Schema(),
       schema.json()
     );
-    convertedSchema[this.MODELGEN_INFFERED_NAME] = schemaUid;
-    alreadyIteratedSchemas.set(schemaUid, convertedSchema);
 
+    convertedSchema[this.MODELGEN_INFFERED_NAME] = schemaUid;
+    //@@@ CAMBIO!
+    if (typeof schemaUid !== 'undefined') {
+        alreadyIteratedSchemas.set(schemaUid, convertedSchema);
+    }
     if (schema.allOf()) {
       convertedSchema.allOf = schema
         .allOf()!
@@ -272,6 +280,8 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
           dependencies[String(dependencyName)] = dependency as string[];
         }
       }
+      console.log(util.inspect('oooo dependencies', {showHidden: false, depth: null, colors: true}))
+      console.log(util.inspect(dependencies, {showHidden: false, depth: null, colors: true}))
       convertedSchema.dependencies = dependencies;
     }
 
@@ -288,6 +298,8 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
         patternProperties[String(patternPropertyName)] =
           this.convertToInternalSchema(patternProperty, alreadyIteratedSchemas);
       }
+      console.log(util.inspect('oooo patternProperties', {showHidden: false, depth: null, colors: true}))
+      console.log(util.inspect(patternProperties, {showHidden: false, depth: null, colors: true}))
       convertedSchema.patternProperties = patternProperties;
     }
 
@@ -302,6 +314,8 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
           alreadyIteratedSchemas
         );
       }
+      console.log(util.inspect('oooo definitions', {showHidden: false, depth: null, colors: true}))
+      console.log(util.inspect(definitions, {showHidden: false, depth: null, colors: true}))
       convertedSchema.definitions = definitions;
     }
 
