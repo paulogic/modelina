@@ -21,7 +21,11 @@ export class ClassRenderer extends PhpRenderer<ConstrainedObjectModel> {
       await this.runAdditionalContentPreset()
     ];
 
-    return `final class ${this.model.name} extends \\Scalefast\\Common\\Event\\AbstractEvent
+    const ext = this.model.name.endsWith('Event')
+        ? ' extends \\Scalefast\\Common\\Event\\AbstractEvent'
+        : ' extends \\Scalefast\\Common\\Dto\\AbstractDto';
+    
+    return `final class ${this.model.name}${ext}
 {
 
  public const EVENT_NAME = '${this.model.name}';
