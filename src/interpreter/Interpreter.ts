@@ -33,6 +33,9 @@ export type InterpreterOptions = {
    * Instead adapt your schemas to be more strict by setting `additionalProperties: false`.
    */
   ignoreAdditionalProperties?: boolean;
+  //@@
+  omitAdditionalProperties?: boolean;
+
   /**
    * For JSON Schema draft 7, additionalItems are by default true, but it might create an unintended types for arrays.
    *

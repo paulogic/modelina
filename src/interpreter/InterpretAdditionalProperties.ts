@@ -40,7 +40,7 @@ export default function interpretAdditionalProperties(
     interpreterOptions
   );
 
-  if (additionalPropertiesModel !== undefined) {
+  if (!interpreterOptions.omitAdditionalProperties && additionalPropertiesModel !== undefined) {
     model.addAdditionalProperty(additionalPropertiesModel, schema);
   }
 }

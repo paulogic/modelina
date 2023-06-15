@@ -24,11 +24,14 @@ export class ClassRenderer extends PhpRenderer<ConstrainedObjectModel> {
     const ext = this.model.name.endsWith('Event')
         ? ' extends \\Scalefast\\Common\\Event\\AbstractEvent'
         : ' extends \\Scalefast\\Common\\Dto\\AbstractDto';
-    
+
+    const eventname = this.model.name.endsWith('Event')
+        ? `public const EVENT_NAME = '${this.model.name}';`
+        : '';
+
     return `final class ${this.model.name}${ext}
 {
-
- public const EVENT_NAME = '${this.model.name}';
+ ${eventname}
 
 ${this.indent(this.renderBlock(content, 2))}
 }
@@ -49,7 +52,12 @@ ${this.indent(this.renderBlock(content, 2))}
       const rendererProperty = await this.runPropertyPreset(property);
       content.push(rendererProperty + ', ');
     }
-    content.push(`) { parent::__construct(); }`);
+
+    if (this.model.name.endsWith('Event')) {
+        content.push(`) { parent::__construct(); }`);
+    } else {
+        content.push(`) { }`);
+    }
      return this.renderBlock(content);
   }
 
