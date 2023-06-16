@@ -320,6 +320,10 @@ export class JsonSchemaInputProcessor extends AbstractInputProcessor {
       typeof schema.additionalProperties === 'object' &&
       schema.additionalProperties !== undefined
     ) {
+      //@@ logs test
+      const util = require('util')
+      console.log('additional ' + util.inspect(schema, {showHidden: false, depth: null, colors: true}))
+
       schema.additionalProperties = this.reflectSchemaNames(
         schema.additionalProperties,
         namesStack,

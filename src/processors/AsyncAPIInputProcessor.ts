@@ -142,7 +142,7 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
         .replace(/-/g, '_')
         .replace('>', '');
     }
-    //@@
+    //@@ logs test
     if (typeof schemaUid !== 'undefined' && schema.type() === 'object') {
        console.log('SCHEMA '+ schemaUid);
     }
@@ -156,7 +156,7 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
     );
 
     convertedSchema[this.MODELGEN_INFFERED_NAME] = schemaUid;
-    //@@@ CAMBIO!
+    //@@ change
     if (typeof schemaUid !== 'undefined') {
         alreadyIteratedSchemas.set(schemaUid, convertedSchema);
     }
@@ -230,6 +230,10 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
       typeof schema.additionalProperties() === 'object' &&
       schema.additionalProperties() !== null
     ) {
+      //@@ logs test
+      const util = require('util')
+      console.log('additional ' + util.inspect(schema, {showHidden: false, depth: null, colors: true}))
+
       convertedSchema.additionalProperties = this.convertToInternalSchema(
         schema.additionalProperties(),
         alreadyIteratedSchemas
