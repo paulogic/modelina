@@ -175,16 +175,29 @@ export class PhpGenerator extends AbstractGenerator<
     const declares: string = completeModelOptionsToUse.declareStrictTypes
       ? 'declare(strict_types=1);'
       : '';
-    const outputModel: RenderOutput = await this.render(args);
-    const modelDependencies: string[] = args.constrainedModel
+    //@@@ HEAD
+    const outputModel: RenderOutput = await this.render(model, inputModel);
+
+    const modelDependencies: string[] = model
+    //@@@ master
+    //const outputModel: RenderOutput = await this.render(args);
+    //const modelDependencies: string[] = args.constrainedModel
       .getNearestDependencies()
       .map((dependencyModel) => {
-        return `use ${completeModelOptionsToUse.namespace}\\${dependencyModel.name};`;
-      });
+
+       //
+       if (typeof dependencyModel.originalInput['x-parser-referenced-class'] !== 'undefined') {
+          return `use ${dependencyModel.originalInput['x-parser-referenced-class']};`;
+       } else {
+          return `use ${completeModelOptionsToUse.namespace}\\${dependencyModel.name.replaceAll('/','\\')};`;
+       }
+    });
+    const namespaceSubdir = model.name.substring(0, model.name.lastIndexOf('/')).replaceAll('/','\\');
+
     const outputContent = `<?php
 ${declares}
 
-namespace ${completeModelOptionsToUse.namespace};
+namespace ${completeModelOptionsToUse.namespace}${namespaceSubdir ? '\\' + namespaceSubdir : ''};
 
 ${modelDependencies.join('\n')}
 ${outputModel.dependencies.join('\n')}

@@ -328,6 +328,7 @@ export class JsonSchemaInputProcessor extends AbstractInputProcessor {
       typeof schema.additionalProperties === 'object' &&
       schema.additionalProperties !== undefined
     ) {
+
       schema.additionalProperties = this.reflectSchemaNames(
         schema.additionalProperties,
         namesStack,

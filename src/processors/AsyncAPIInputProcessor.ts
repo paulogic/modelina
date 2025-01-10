@@ -99,9 +99,37 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
     if (!doc) {
       throw new Error('Could not parse input as AsyncAPI document');
     }
-
     inputModel.originalInput = doc;
+    //@@@ HEAD
+    // Go over all the message payloads and convert them to models
+    //for (const message of doc.allMessages()) {
 
+      //@@@ My previous addition
+      // If message is in a "publish" operation then it is not CREATED by this service.
+      // Exception: the 'hidden' channel payload classes are always generated
+      //if (message.operations().some(op => op.action() === 'publish') &&
+      //    !message.channels().some(ch => ch.id() === 'hidden')
+      //    ) {
+      //   continue;
+      //}
+
+    //  const payload = message.payload();
+    //  if (payload) {
+    //    const schema = AsyncAPIInputProcessor.convertToInternalSchema(payload);
+    //    const newCommonModel =
+    //      JsonSchemaInputProcessor.convertSchemaToCommonModel(schema, options);
+    //    if (newCommonModel.$id !== undefined) {
+    //      if (inputModel.models[newCommonModel.$id] !== undefined) {
+    //        Logger.warn(
+    //          `Overwriting existing model with $id ${newCommonModel.$id}, are there two models with the same id present?`,
+    //          newCommonModel
+    //        );
+    //      }
+    //      const metaModel = convertToMetaModel(newCommonModel);
+    //      inputModel.models[metaModel.name] = metaModel;
+    //    } else {
+
+    //@@@ master ->
     const addToInputModel = (payload: AsyncAPISchemaInterface) => {
       const schema = AsyncAPIInputProcessor.convertToInternalSchema(payload);
       const newCommonModel =
@@ -109,6 +137,7 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
 
       if (newCommonModel.$id !== undefined) {
         if (inputModel.models[newCommonModel.$id] !== undefined) {
+    //@@@ <- master
           Logger.warn(
             `Overwriting existing model with $id ${newCommonModel.$id}, are there two models with the same id present?`,
             newCommonModel
@@ -204,17 +233,19 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
         .replace(/-/g, '_')
         .replace('>', '');
     }
-
     if (alreadyIteratedSchemas.has(schemaUid)) {
       return alreadyIteratedSchemas.get(schemaUid) as AsyncapiV2Schema;
     }
-
     const convertedSchema = Object.assign(
       new AsyncapiV2Schema(),
       schema.json()
     );
+
     convertedSchema[this.MODELGEN_INFFERED_NAME] = schemaUid;
-    alreadyIteratedSchemas.set(schemaUid, convertedSchema);
+    // change to avoid override all undefined schemas with the values of the first undefined one
+    if (typeof schemaUid !== 'undefined') {
+       alreadyIteratedSchemas.set(schemaUid, convertedSchema);
+    }
 
     if (schema.allOf()) {
       convertedSchema.allOf = schema
@@ -370,7 +401,6 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
       }
       convertedSchema.definitions = definitions;
     }
-
     return convertedSchema;
   }
 

@@ -51,6 +51,7 @@ export class InputProcessor {
         continue;
       }
       if (processor.shouldProcess(input)) {
+        //'asyncapi'
         return processor.process(input, options);
       }
     }
