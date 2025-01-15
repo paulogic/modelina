@@ -158,10 +158,11 @@ ${block}
     const type = obj.type;
 
     if (typeof type !== 'undefined') {
-        let types = Array.from(new Set([type]))
+        let types_set = new Set([type])
         if (obj.options && obj.options.isNullable) {
-          types.push('null');
+          types_set.add('null');
         }
+        const types = Array.from(types_set)
         for (const t of types) {
             switch (t) {
                case 'mixed':

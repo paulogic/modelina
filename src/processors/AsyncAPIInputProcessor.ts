@@ -100,36 +100,6 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
       throw new Error('Could not parse input as AsyncAPI document');
     }
     inputModel.originalInput = doc;
-    //@@@ HEAD
-    // Go over all the message payloads and convert them to models
-    //for (const message of doc.allMessages()) {
-
-      //@@@ My previous addition
-      // If message is in a "publish" operation then it is not CREATED by this service.
-      // Exception: the 'hidden' channel payload classes are always generated
-      //if (message.operations().some(op => op.action() === 'publish') &&
-      //    !message.channels().some(ch => ch.id() === 'hidden')
-      //    ) {
-      //   continue;
-      //}
-
-    //  const payload = message.payload();
-    //  if (payload) {
-    //    const schema = AsyncAPIInputProcessor.convertToInternalSchema(payload);
-    //    const newCommonModel =
-    //      JsonSchemaInputProcessor.convertSchemaToCommonModel(schema, options);
-    //    if (newCommonModel.$id !== undefined) {
-    //      if (inputModel.models[newCommonModel.$id] !== undefined) {
-    //        Logger.warn(
-    //          `Overwriting existing model with $id ${newCommonModel.$id}, are there two models with the same id present?`,
-    //          newCommonModel
-    //        );
-    //      }
-    //      const metaModel = convertToMetaModel(newCommonModel);
-    //      inputModel.models[metaModel.name] = metaModel;
-    //    } else {
-
-    //@@@ master ->
     const addToInputModel = (payload: AsyncAPISchemaInterface) => {
       const schema = AsyncAPIInputProcessor.convertToInternalSchema(payload);
       const newCommonModel =
@@ -137,7 +107,6 @@ export class AsyncAPIInputProcessor extends AbstractInputProcessor {
 
       if (newCommonModel.$id !== undefined) {
         if (inputModel.models[newCommonModel.$id] !== undefined) {
-    //@@@ <- master
           Logger.warn(
             `Overwriting existing model with $id ${newCommonModel.$id}, are there two models with the same id present?`,
             newCommonModel
