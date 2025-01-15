@@ -34,10 +34,11 @@ export class ClassRenderer extends PhpRenderer<ConstrainedObjectModel> {
     let eventName = '';
     let ctor = '';
     let content = [];
+
     switch (true) {
        case plainName.endsWith('Event'):
            ctor = await this.runCtorPreset();
-           ext = ' extends \\RootNamespace\\Common\\Event\\AbstractEvent';
+           ext = this.options.eventsParentClass !== undefined ? ' extends \\' + this.options.eventsParentClass : ''
            content = [ctor, await this.runAdditionalContentPreset()];
            block = this.indent(this.renderBlock(content, 2));
            eventName = `public const EVENT_NAME = '${plainName}';`
@@ -49,7 +50,7 @@ export class ClassRenderer extends PhpRenderer<ConstrainedObjectModel> {
        default:
           //Considered a normal Dto
           ctor = await this.runCtorPreset();
-          ext = ' extends \\RootNamespace\\Common\\Dto\\AbstractDto';
+          ext =  this.options.dtoParentClass !== undefined ? ' extends \\' + this.options.dtoParentClass : ''
           content = [ctor, await this.runAdditionalContentPreset()];
           block = this.indent(this.renderBlock(content, 2));
           break;
@@ -155,8 +156,12 @@ ${block}
   getTypes(obj: any, list: Array<string>): Array<string> {
 
     const type = obj.type;
+
     if (typeof type !== 'undefined') {
-        const types = [].concat(type);
+        let types = Array.from(new Set([type]))
+        if (obj.options && obj.options.isNullable) {
+          types.push('null');
+        }
         for (const t of types) {
             switch (t) {
                case 'mixed':

@@ -35,6 +35,8 @@ import { PhpDependencyManager } from './PhpDependencyManager';
 export interface PhpOptions extends CommonGeneratorOptions<PhpPreset> {
   typeMapping: TypeMapping<PhpOptions, PhpDependencyManager>;
   constraints: Constraints<PhpOptions>;
+  eventsParentClass?: string;
+  dtoParentClass?: string;
 }
 export type PhpConstantConstraint = ConstantConstraint<PhpOptions>;
 export type PhpEnumKeyConstraint = EnumKeyConstraint<PhpOptions>;
@@ -175,13 +177,8 @@ export class PhpGenerator extends AbstractGenerator<
     const declares: string = completeModelOptionsToUse.declareStrictTypes
       ? 'declare(strict_types=1);'
       : '';
-    //@@@ HEAD
-    const outputModel: RenderOutput = await this.render(model, inputModel);
-
-    const modelDependencies: string[] = model
-    //@@@ master
-    //const outputModel: RenderOutput = await this.render(args);
-    //const modelDependencies: string[] = args.constrainedModel
+    const outputModel: RenderOutput = await this.render(args);
+    const modelDependencies: string[] = args.constrainedModel
       .getNearestDependencies()
       .map((dependencyModel) => {
 
@@ -192,7 +189,8 @@ export class PhpGenerator extends AbstractGenerator<
           return `use ${completeModelOptionsToUse.namespace}\\${dependencyModel.name.replaceAll('/','\\')};`;
        }
     });
-    const namespaceSubdir = model.name.substring(0, model.name.lastIndexOf('/')).replaceAll('/','\\');
+    const name = args.constrainedModel.name; 
+    const namespaceSubdir = name.substring(0, name.lastIndexOf('/')).replaceAll('/','\\');
 
     const outputContent = `<?php
 ${declares}
